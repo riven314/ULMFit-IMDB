@@ -4,7 +4,7 @@ from fastai import *
 from fastai.text import *
 from molecule_utils import *
 
-bs = 128
+bs = 64 # transformer takes a lot more memory
 path = Path('results/MSPM')
 print(f'batch size: {bs}')
 print(f'save path: {path}')
@@ -33,14 +33,14 @@ else:
     data_lm.save(f'MSPM_databunch.pkl')
     print('databunch loaded')
 
-learner = language_model_learner(data_lm, AWD_LSTM, drop_mult = 1, pretrained = False)
-lr = (3e-3 * bs) / 48
+learner = language_model_learner(data_lm, Transformer, drop_mult = 1, pretrained = False)
+lr = (1e-4 * bs) / 48
 
 # unfreeze all layers and train
 print('start training')
 learner.unfreeze()
 learner.fit_one_cycle(10, lr, moms = (0.8, 0.7))
 # save model and vocab
-learner.save('MSPM_wt', with_opt = False)
-learner.data.vocab.save(path / 'MSPM_vocab.pkl')
+learner.save('MSPM_transformer_wt', with_opt = False)
+learner.data.vocab.save(path / 'MSPM_transformer_vocab.pkl')
 
